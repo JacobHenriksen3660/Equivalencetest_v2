@@ -2,7 +2,8 @@
 """
 Created on Fri Apr 28 10:28:00 2023
 
-@author: jhe
+@author: jheee
+hej
 """
 from scipy.stats import ttest_ind, f_oneway, levene #statistical tool to calculate the desired p-value
 
