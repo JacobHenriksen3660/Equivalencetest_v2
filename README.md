@@ -1,5 +1,5 @@
 # Equivalencetest_v2
-Equivalence test at ibsen to test DE2 vs DE3
+Equivalence test at ibsen to test DE2 vs DE3 using scipy.
 
 transform_headers transforms Ibsens DE data headers to a structure that fits a data frame
 
