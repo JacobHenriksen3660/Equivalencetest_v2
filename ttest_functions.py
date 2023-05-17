@@ -2,10 +2,10 @@
 """
 Created on Fri Apr 28 10:28:00 2023
 
-@author: jheee
-hej
+@author: jhe
 """
 from scipy.stats import ttest_ind, f_oneway, levene #statistical tool to calculate the desired p-value
+import numpy as np
 
 #desired to transform ibsens DE sheets into a dataframe structure that makes sense
 def transform_headers(df):
@@ -22,6 +22,34 @@ def transform_headers(df):
             prev_col = col_name
     
     return df
+
+def equivalence_test(data1, data2):
+    # Calculate the mean and standard deviation of the two data sets
+    mean1 = np.mean(data1)
+    mean2 = np.mean(data2)
+    std1 = np.std(data1, ddof=len(data1)-1)
+    std2 = np.std(data2, ddof=len(data2)-1)
+
+    # Calculate the critical value for the specified significance level
+    n1 = len(data1)
+    n2 = len(data2)
+    df = n1 + n2 - 2
+    alpha = 0.05 #5% significance = 95% confidence
+    t_stat, p_value = ttest_ind(data1, data2)  # Get the t-value and p-value from a t-test
+    t_crit = np.abs(t_stat)  # Take the absolute value
+
+    # Calculate the equivalence bounds
+    equivalence_range = 0.005  # 0.5% range
+    equivalence_bound = equivalence_range * np.sqrt((std1 ** 2 + std2 ** 2) / 2)
+
+    # Calculate the confidence interval
+    conf_interval = np.abs(mean1 - mean2) - t_crit * np.sqrt((std1 ** 2 / n1) + (std2 ** 2 / n2))
+
+    # Perform the equivalence test
+    if conf_interval <= equivalence_bound:
+        return "The mean of the data sets are equivalent.", p_value
+    else:
+        return "The mean of the data sets are not equivalent.", p_value
 
 #perform a two one-sided equivalence test (TOST) for equivalence
 def two_one_sided_t_test(data1, data2, alpha=0.05): #alpha is significance level
@@ -51,3 +79,13 @@ def levene_test(data1,data2,alpha=0.05):
             'p_value_levene',p_value_levene,
             'explanation',why_string
            ] 
+
+#I make a function that removes outliers in data
+def remove_outliers(df):
+    # Calculate z-score for each group
+    z_scores = df.groupby("Grating")["DE"].transform(lambda x: (x - x.mean()) / x.std())
+    # Define threshold for outliers (e.g., z-score > 3 or z-score < -3)
+    threshold = 3
+    # Filter out rows with z-score exceeding the threshold
+    filtered_df = df[abs(z_scores) <= threshold]
+    return filtered_df
