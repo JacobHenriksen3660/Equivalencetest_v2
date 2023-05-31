@@ -4,8 +4,17 @@ Created on Fri Apr 28 10:28:00 2023
 
 @author: jhe
 """
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Apr 28 10:28:00 2023
+
+@author: jhe
+"""
+from scipy import stats
 from scipy.stats import ttest_ind, f_oneway, levene #statistical tool to calculate the desired p-value
 import numpy as np
+from scipy.stats import ttest_ind
+import statsmodels.stats.weightstats as st
 
 #desired to transform ibsens DE sheets into a dataframe structure that makes sense
 def transform_headers(df):
@@ -23,33 +32,8 @@ def transform_headers(df):
     
     return df
 
-def equivalence_test(data1, data2):
-    # Calculate the mean and standard deviation of the two data sets
-    mean1 = np.mean(data1)
-    mean2 = np.mean(data2)
-    std1 = np.std(data1, ddof=len(data1)-1)
-    std2 = np.std(data2, ddof=len(data2)-1)
 
-    # Calculate the critical value for the specified significance level
-    n1 = len(data1)
-    n2 = len(data2)
-    df = n1 + n2 - 2
-    alpha = 0.05 #5% significance = 95% confidence
-    t_stat, p_value = ttest_ind(data1, data2)  # Get the t-value and p-value from a t-test
-    t_crit = np.abs(t_stat)  # Take the absolute value
 
-    # Calculate the equivalence bounds
-    equivalence_range = 0.005  # 0.5% range
-    equivalence_bound = equivalence_range * np.sqrt((std1 ** 2 + std2 ** 2) / 2)
-
-    # Calculate the confidence interval
-    conf_interval = np.abs(mean1 - mean2) - t_crit * np.sqrt((std1 ** 2 / n1) + (std2 ** 2 / n2))
-
-    # Perform the equivalence test
-    if conf_interval <= equivalence_bound:
-        return "The mean of the data sets are equivalent.", p_value
-    else:
-        return "The mean of the data sets are not equivalent.", p_value
 
 #perform a two one-sided equivalence test (TOST) for equivalence
 def two_one_sided_t_test(data1, data2, alpha=0.05): #alpha is significance level
@@ -89,3 +73,32 @@ def remove_outliers(df):
     # Filter out rows with z-score exceeding the threshold
     filtered_df = df[abs(z_scores) <= threshold]
     return filtered_df
+
+    
+    
+
+
+def two_sample_equivalence_test(data1, data2):
+    alpha = 0.05
+    acceptable_range = 0.0025  # Minimum acceptable range for difference in mean
+    mean = abs(np.mean(data1)-np.mean(data2))
+    
+    low = mean-acceptable_range
+    upp = mean+acceptable_range
+
+    # Perform the equivalence test
+    result = st.ttost_ind(data1, data2, low, upp, usevar='unequal', weights=(None, None), transform=None)
+
+    p_value = result[0]
+
+    if p_value < alpha:
+        is_equivalent = True
+    else:
+        is_equivalent = False
+
+    return [is_equivalent, p_value]
+
+
+# Function to round a number to 4 decimal xD
+def round_to_4_decimals(num):
+    return round(num, 4)
