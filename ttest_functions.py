@@ -7,6 +7,7 @@ Created on Fri Apr 28 10:28:00 2023
 # -*- coding: utf-8 -*-
 """
 Created on Fri Apr 28 10:28:00 2023
+#only functions
 
 @author: jhe
 """
@@ -35,7 +36,7 @@ def transform_headers(df):
 
 
 
-#perform a two one-sided equivalence test (TOST) for equivalence
+#perform a two one-sided equivalence test (TOST) for equivalence ye
 def two_one_sided_t_test(data1, data2, alpha=0.05): #alpha is significance level
     tost_low = -0.0025 #define the pre defined range
     tost_high = 0.0025 #is between -0.25% and +0.25%. which is a total of 0.5%
